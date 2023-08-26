@@ -1,17 +1,130 @@
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Pages/Pelican.gitlab-ci.yml
+# This file is a template, and might need editing before it works on your project.
+# Full project: https://gitlab.com/pages/plain-html
+stages:
+  - build
+  - deploy
 
-default:
-  # Full project: https://gitlab.com/pages/pelican
-  image: python:2.7-alpine
+# TODO: build a docker image for the makefile w/ the requirements just installed
+image: nikolaik/python-nodejs:latest
 
-pages:
+.install_deps_: &install_deps
+  ### installation
+  - echo -e "section_start:`date +%s`:installation\r\e[0K\033[1m\e[96mInstalling Requirements and Dependencies..."
+  - |-
+      cat << EOF
+      Required Pandoc Utils:
+      - pandoc filters (plantuml & mermaid)
+      - pandoc lua filters (gitlab-math & fix-links)
+      - pandoc templates
+      Supporting Tech:
+      - lua
+      - mermaid
+      - plantuml
+      - pandoc
+      Dependencies:
+      - xvfb
+      - libgbm1
+      EOF
+  - apt-get update -qq
+  # install mermaid
+  - yarn global add @mermaid-js/mermaid-cli
+  # install plantuml, pandoc, & xvfb
+  # xvfb: https://askubuntu.com/a/1117205
+  - apt-get install -qq -y pandoc xvfb
+  - apt-get install -qq -y libgbm1
+  - Xvfb :100 -ac &
+  - export DISPLAY=:100.0 # Select screen 100.
+  - apt-get install -qq -y plantuml
+  # install lua
+  - apt-get install -qq -y lua5.3
+  # install plantuml, mermaid, and kroki filter
+  - pip install git+https://github.com/MyriaCore/pandoc-plantuml-filter.git
+  - pip install git+https://github.com/MyriaCore/pandoc-mermaid-filter.git
+  - pip install git+https://gitlab.com/myriacore/pandoc-kroki-filter.git
+  # install lua filters
+  - mkdir -p ~/.pandoc/filters
+  - wget https://gist.githubusercontent.com/lierdakil/00d8143465a488e0b854a3b4bf355cf6/raw/gitlab-math.lua
+  - mv gitlab-math.lua ~/.pandoc/filters/gitlab-math.lua
+  - wget https://gist.githubusercontent.com/MyriaCore/75729707404cba1c0de89cc03b7a6adf/raw/fix-links.lua
+  - mv fix-links.lua ~/.pandoc/filters/fix-links.lua
+  # install templates
+  - mkdir -p ~/.pandoc/templates
+  - wget https://raw.githubusercontent.com/tajmone/pandoc-goodies/master/templates/html5/github/GitHub.html5
+  - mv GitHub.html5 ~/.pandoc/templates/GitHub.html5
+  - wget https://raw.githubusercontent.com/Wandmalfarbe/pandoc-latex-template/master/eisvogel.tex
+  - mv eisvogel.tex ~/.pandoc/templates/eisvogel.latex
+  - echo -e "section_end:`date +%s`:installation\r\e[0K"
+  ### configuration
+  - echo -e "section_start:`date +%s`:configuration\r\e[0K\033[1m\e[96mConfiguring Installed Packages..."
+  # expose mmdc
+  - export PATH=$(yarn global bin):$PATH
+  # headless mermaid workaround
+  - |-
+      cat > .puppeteer-config.json << EOF
+      {
+          "args": ["--no-sandbox"]
+      }
+      EOF
+  - export PUPPETEER_CFG="$(realpath .puppeteer-config.json)"
+  - echo -e "section_end:`date +%s`:configuration\r\e[0K"
+  - cd $CI_PROJECT_DIR
+
+# Experimental
+build:notes.pdf:
+  stage: build
+  when: manual
+  before_script:
+    - apt-get install texlive-full
+    - *install_deps
   script:
-    - pip install -r requirements.txt
-    - pelican -s publishconf.py
+    - apt-get update -qq
+    - apt-get install -qq -y texlive-full
+    - make notes.pdf
+  artifacts:
+    name: standalone pdf
+    paths: [ notes.pdf ]
+# Experimental
+build:notes.html:
+  stage: build
+  when: manual
+  before_script: *install_deps
+  script: make notes.html
+  artifacts:
+    name: standalone html
+    paths: [ notes.html ]
+
+build:html:
+  stage: build
+  when: manual
+  before_script: *install_deps
+  script: [ make ]
   artifacts:
     paths:
-      - public/
-  environment: production
+      - ./
+    exclude:
+      - "*.md"
+      - ".*"
+      - notes.tar.gz
+      - notes.pdf
+      - notes.html
+
+build:tar:
+  stage: build
+  before_script: *install_deps
+  script: make tar
+  artifacts:
+    name: tarballed html
+    paths: [ notes.tar.gz ]
+
+pages:
+  stage: deploy
+  script:
+    - mkdir -p public
+    - tar -xzf notes.tar.gz -C public
+  dependencies:
+      - build:tar
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
