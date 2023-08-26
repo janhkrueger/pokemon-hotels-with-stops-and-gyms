@@ -1,3 +1,7 @@
+---
+title: Hotels with Stops and Gyms
+---
+
 # Hotels with Stops and Gyms
 
 ## Germany
