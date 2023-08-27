@@ -14,4 +14,5 @@ title: Hotels with Stops and Gyms
 
 | Hotel  | Stops  | Gyms  | Location |
 |---|---|---|---|
-| Motel One Hauptbahnhof  | 1 | 1 |  |
+| Motel One Hauptbahnhof | 1 | 1 |  |
+| Premier Inn Wiesbaden City Centre | 1 | 0 |  |
