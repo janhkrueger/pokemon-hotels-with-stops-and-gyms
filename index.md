@@ -4,6 +4,13 @@ title: Hotels with Stops and Gyms
 
 ## Germany
 
+### Bad Homburg
+
+| Hotel  | Stops  | Gyms  | Location |
+|---|---|---|---|
+| B&B Bad Homburg  | 3 | 0 |![](images/GermanyB_und_B_Bad_Homburg.jpg) |
+
+
 ### Frankfurt
 
 | Hotel  | Stops  | Gyms  | Location |
