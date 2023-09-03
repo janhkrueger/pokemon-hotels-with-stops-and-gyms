@@ -17,6 +17,12 @@ title: Hotels with Stops and Gyms
 |---|---|---|---|
 | Motel One Frankfurt Römer  | 3 | 0 |![](images/GermanyMotelOneFrankfurtRoemer.jpeg) |
 
+### Hamburg
+
+| Hotel  | Stops  | Gyms  | Location |
+|---|---|---|---|
+| Adina Apartment Hotel Hamburg Michel  | 3 | 0 |![](GermanyAdinaApartmenthotelMichlHamburg.jpg) |
+
 ### Wiesbaden
 
 | Hotel  | Stops  | Gyms  | Location |
