@@ -21,7 +21,7 @@ title: Hotels with Stops and Gyms
 
 | Hotel  | Stops  | Gyms  | Location |
 |---|---|---|---|
-| Adina Apartment Hotel Hamburg Michel  | 3 | 0 |![](GermanyAdinaApartmenthotelMichlHamburg.jpg) |
+| Adina Apartment Hotel Hamburg Michel  | 3 | 0 |![](images/GermanyAdinaApartmenthotelMichlHamburg.jpg) |
 
 ### Wiesbaden
 
